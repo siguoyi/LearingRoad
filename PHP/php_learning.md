@@ -165,6 +165,39 @@ PHP 支持 C，C++ 和 Unix Shell 风格（Perl 风格）的注释。例如:
 	This should not print a capital 'A': \x41
 	EOT;
 	?>
+#### PHP中单引号和双引号的区别 ####
+在PHP中，字符串的定义可以使用单引号，也可以使用双引号。但是必须使用同一种单或双引号来定义字符串，如：‘Hello"和“Hello'为非法的字符串定义。
+
+定义字符串时，只有一种引号被视为定义符，即单引号或双引号。于是，如果一个字符串由双引号开始，那么只有双引号被分析器解析。这样，你就可以在双引号串中包含任何其他字符，甚至单引号。下面的引号串都是合法的： 
+
+    $s = "I am a 'single quote string' inside a double quote string"; 
+
+	$s = 'I am a "double quote string" inside a single quote string'; 
+	
+	$s = "I am a 'single quote string' inside a double quote string"; 
+	
+	$s = 'I am a "double quote string" inside a single quote string'; 
+
+而串 "Why doesn't "this" work?" 则会被分为三段。如果在这个串中想要表示出双引号，则可以使用转义符"\"（反斜线），变成 "Why doesn't \"this\" work?" 即可。 
+
+定义字符串变量时，PHP允许我们在双引号串中直接包含字串变量，我们可以发现下面的两个字串的处理结果是相同的。 
+
+    $full_name = $first_name . ' ' . $last_name; 
+	
+	$full_name = "$first_name $last_name"; 
+
+单引号串和双引号串在PHP中的处理是不相同的。**双引号串中的内容可以被解释而且替换，而单引号串中的内容总被认为是普通字符。**
+
+一般情况下两者是通用的，但是” ” 双引号里面的字段会经过编译器解释，然后再当作HTML代码输出。‘ ‘ 单引号里面的不进行解释，直接输出。从字面意思上就可以看出，单引号比双引号要快了。所以如果内部只有纯字符串的时候,用单引号(速度快),内部有别的东西(如变量)的时候,用双号引更好点
+
+**PHP引号使用原则：**
+
+1. 字符串的值用引号
+2. PHP中尽量用单引号,HTML代码全部用双引号
+3. 在包含变量的时候,用双引号可以简化操作
+4. 复杂的情况下用大括号包起来
+5. PHP引号还有一个用处就是，有的时候需要用php生成文本文件，换行符\n需要用双引号才能好使，单引号则会直接把\n当成字符输出。
+
 ### Array 数组  ###
 PHP 中的数组实际上是一个有序映射。映射是一种把 values 关联到 keys 的类型。此类型在很多方面做了优化，因此可以把它当成真正的数组，或列表（向量），散列表（是映射的一种实现），字典，集合，栈，队列以及更多可能性。由于数组元素的值也可以是另一个数组，树形结构和多维数组也是允许的。
 
@@ -180,3 +213,95 @@ PHP 中的数组实际上是一个有序映射。映射是一种把 values 关�
 	    "bar" => "foo",
 	];
 	?>
+在PHP中, 数组是用一种HASH结构(**HashTable**)来实现的,(但是PHP手册上说“PHP中的数组实际上是一个**有序图**。图是一种把values映射到keys的类型。此类型在很多方面做了优化，因此可以把它当成真正的数组来使用，或列表（矢量），散列表（是图的一种实现），字典，集合，栈，队列以及更多可能性。因为可以用另一个PHP数组作为值，也可以很容易地模拟树。”) PHP使用了一些机制, 使得可以在O(1)的时间复杂度下实现数组的增删, 并同时支持线性遍历和随机访问. 
+
+PHP中遍历数组的方式汇总：
+
+1.foreach 
+
+一个用来遍历数组中数据的最简单有效的方法。
+
+    <?php
+	$colors= array('red','blue','green','yellow');
+	foreach ($colors as $color){
+		echo "Do you like $color? <br />";
+		}
+	?>
+2.while 
+
+while() 通常和 list()，each()配合使用。
+
+    <?php
+	$colors= array('red','blue','green','yellow');
+	while(list($key,$val)= each($colors)) {
+		echo "Other list of $val.<br />";
+		}
+	?>
+3.for()
+
+    <?php
+	$arr= array ("0"=> "zero","1"=> "one","2"=> "two");
+	for ($i= 0;$i< count($arr); $i++){
+		$str= $arr[$i];
+		echo "the number is $str.<br />";
+		}
+	?>
+4.key() 
+
+key()函数返回input_array中位于当前指针位置的键元素。
+
+    <?php
+	$capitals= array("Ohio"=> "Columbus","Towa"=> "Des Moines","Arizona"=> "Phoenix");
+	echo "<p>Can you name the capitals of these states?</p>";
+	while($key= key($capitals)) {
+		echo $key."<br />";
+		next($capitals);
+		//每个key()调用不会推进指针。为此要使用next()函数
+		}
+	?>
+5.reset()
+
+reset()函数用来将input_array的指针设置回数组的开始位置。如果需要在一个脚本中多次查看或处理同一个数组，就经常使用这个函数，另外这个函数还常用于排序结束时。
+
+    <?php
+	$colors= array('red','blue','green','yellow');
+	foreach ($colorsas$color){
+		echo "Do you like $color? <br />";
+	}
+	reset($colors);
+	while(list($key,$val)= each($colors)) {
+		echo "$key=> $val<br />";
+	}
+	?>
+6.each()
+
+each()函数返回输入数组当前键/值对，并将指针推进一个位置。返回的数组包含四个键，键0和key包含键名，而键1和value包含相应的数据。如果执行each()前指针位于数组末尾，则返回FALSE。
+
+    <?php
+	$capitals= array("Ohio"=> "Columbus","Towa"=> "Des Moines","Arizona"=> "Phoenix");
+	$s1= each($capitals);
+	print_r($s1);
+	?>
+7.current()，next()，prev()，end()
+
+current()函数 返回位于targetArray数组当前指针位置的数组值。与next()、prev()、和end()函数不同，current()不移动指针。 
+
+next()函数 返回紧接着放在当前数组指针的下一个位置的数组值。 
+
+prev()函数 返回位于当前指针的前一个位置的数组值，如果指针本来就位于数组的第一个位置，则返回FALSE。 
+
+end()函数 将指针移向targetArray的最后一个位置，并返回最后一个元素。
+
+    <?php
+	$fruits= array("apple","orange","banana");
+	$fruit= current($fruits); //return "apple"
+	echo $fruit."<br />";
+	$fruit= next($fruits); //return "orange"
+	echo $fruit."<br />";
+	$fruit= prev($fruits); //return "apple"
+	echo $fruit."<br />";
+	$fruit= end($fruits); //return "banana"
+	echo $fruit."<br />";
+	?>
+
+对数组遍历速度进行测试，测试的遍历方法为常用的三种for、while、foreach。经过反复多次测试，结果表明，对于遍历同样一个数组，foreach速度最快，最慢的则是while。从原理上来看，foreach是对数组副本进行操作（通过拷贝数组），而while则通过移动数组内部指标进行操作，一般逻辑下认为，while应该比foreach快（因为foreach在开始执行的时候首先把数组复制进去，而while直接移动内部指标。），但结果刚刚相反。原因应该是，foreach是PHP内部实现，而while是通用的循环结构。所以，在通常应用中foreach简单，而且效率高。在PHP5下，foreach还可以遍历类的属性。
