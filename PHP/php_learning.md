@@ -305,3 +305,102 @@ end()函数 将指针移向targetArray的最后一个位置，并返回最后一
 	?>
 
 对数组遍历速度进行测试，测试的遍历方法为常用的三种for、while、foreach。经过反复多次测试，结果表明，对于遍历同样一个数组，foreach速度最快，最慢的则是while。从原理上来看，foreach是对数组副本进行操作（通过拷贝数组），而while则通过移动数组内部指标进行操作，一般逻辑下认为，while应该比foreach快（因为foreach在开始执行的时候首先把数组复制进去，而while直接移动内部指标。），但结果刚刚相反。原因应该是，foreach是PHP内部实现，而while是通用的循环结构。所以，在通常应用中foreach简单，而且效率高。在PHP5下，foreach还可以遍历类的属性。
+## 对象 ##
+自 PHP 5 起完全重写了对象模型以得到更佳性能和更多特性。PHP 5 中的新特性包括访问控制，抽象类和 final 类与方法，附加的魔术方法，接口，对象复制和类型约束。PHP 对待对象的方式与引用和句柄相同，即每个变量都持有对象的引用，而不是整个对象的拷贝。
+### class ###
+每个类的定义都以关键字 class 开头，后面跟着类名，后面跟着一对花括号，里面包含有类的属性与方法的定义。
+
+类名可以是任何非 PHP 保留字的合法标签。一个合法类名以字母或下划线开头，后面跟着若干字母，数字或下划线。以正则表达式表示为：**[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]\***。
+
+一个类可以包含有属于自己的常量，变量（称为“属性”）以及函数（称为“方法”）。
+
+    <?php
+	class SimpleClass
+	{
+	    // property declaration
+	    public $var = 'a default value';
+	
+	    // method declaration
+	    public function displayVar() {
+	        echo $this->var;
+	    }
+	}
+	?>
+当一个方法在类定义内部被调用时，有一个可用的伪变量 $this。$this 是一个到主叫对象的引用（通常是该方法所从属的对象，但如果是从第二个对象静态调用时也可能是另一个对象）。
+### new  ###
+要创建一个类的实例，必须使用 new 关键字。当创建新对象时该对象总是被赋值，除非该对象定义了构造函数并且在出错时抛出了一个异常。类应在被实例化之前定义（某些情况下则必须这样）。
+
+如果在 new 之后跟着的是一个包含有类名的字符串，则该类的一个实例被创建。如果该类属于一个名字空间，则必须使用其完整名称。
+
+    <?php
+	$instance = new SimpleClass();
+	
+	// 也可以这样做：
+	$className = 'Foo';
+	$instance = new $className(); // Foo()
+	?>
+在类定义内部，可以用 new self 和 new parent 创建新对象。
+
+当把一个对象已经创建的实例赋给一个新变量时，新变量会访问同一个实例，就和用该对象赋值一样。此行为和给函数传递入实例时一样。可以用克隆给一个已创建的对象建立一个新实例。
+### extends  ###
+一个类可以在声明中用 extends 关键字继承另一个类的方法和属性。PHP不支持多重继承，一个类只能继承一个基类。
+
+被继承的方法和属性可以通过用同样的名字重新声明被覆盖。但是如果父类定义方法时使用了 final，则该方法不可被覆盖。可以通过 parent:: 来访问被覆盖的方法或属性。
+
+当覆盖方法时，参数必须保持一致否则 PHP 将发出 E_STRICT 级别的错误信息。但构造函数例外，构造函数可在被覆盖时使用不同的参数。
+
+    <?php
+	class ExtendClass extends SimpleClass
+	{
+	    // Redefine the parent method
+	    function displayVar()
+	    {
+	        echo "Extending class\n";
+	        parent::displayVar();
+	    }
+	}
+	
+	$extended = new ExtendClass();
+	$extended->displayVar();
+	?>
+### ::class ###
+自 PHP 5.5 起，关键词 class 也可用于类名的解析。使用 ClassName::class 你可以获取一个字符串，包含了类 ClassName 的完全限定名称。这对使用了 命名空间 的类尤其有用。这个是作用域限定操作符，是用一个双冒号"::"表示，它用来置顶类中不同作用域的级别。左边是作用域,右边是访问作用域的成员。
+
+    <?php
+	namespace NS {
+	    class ClassName {
+	    }
+	    
+	    echo ClassName::class;
+	}
+	?>
+以上例程会输出：
+
+    NS\ClassName
+
+在php中定义的作用域有self和parent两种（在php6中提供了static作用域）。
+
+self:表示当前类的作用域，与this不同的是它不表示类的某个特定实例，在类之外的代码中不能使用self，而且它不能识别自己在继承中层次的位置。也就是说，**当在扩展类中使用self时，它调用的不是父类的方法，而是扩展类的重载的方法**。
+
+parent：表示当前类父类的作用域，其余的跟self特性一样。
+
+    <?php 
+	class forasp {   
+	    static $url="http://blog.csdn.net/abandonship";   
+	    static $webname = "PHP学习之双冒号的用法";   
+	    public function writeurl(){     
+	        echo self::$url;//调用自己的内容   
+	    }   
+	    public function writewebname(){     
+	        echo "测试子类调用父类内容";       } 
+	}  
+	class cn extends forasp {   
+	    function father() {     
+	        parent::wirtewebname();   
+	    } 
+	}  
+	$a = new forasp();//实例化父类 
+	$a->writeurl();//调用自身内容 
+	$b = new cn(); 
+	$b->writewebname();//调用父类内容 
+	?>
