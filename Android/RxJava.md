@@ -358,6 +358,7 @@ TestScheduler让你可以对调度器的时钟表现进行手动微调。这对�
 - triggerActions( ) 开始执行任何计划中的但是未启动的任务，如果它们的计划时间等于或者早于调度器时钟的当前时间
 
 线程调度器（Scheduler）是将RxJava从同步观察者模式转到异步观察者模式的一个重要工具，有了它才能更好的将RxJava应用到项目中。
+
 ## 参考： ##
 [https://github.com/ReactiveX/RxJava](https://github.com/ReactiveX/RxJava)
 
