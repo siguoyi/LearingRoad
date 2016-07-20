@@ -146,7 +146,7 @@ currentPostingThreadState是一个ThreadLocal类型的，里面存储了PostingT
     private void postSingleEvent(Object event, PostingThreadState postingState) throws Error {
         Class<? extends Object> eventClass = event.getClass();
 		//根据event的Class，去得到一个List<Class<?>>；其实就是得到event当前对象的Class，
-		//以及父类和接口的Class类型；主要用于匹配，比如你传入Dog extends Dog，他会把Animal也装到该List中。
+		//以及父类和接口的Class类型；主要用于匹配，比如你传入Dog extends Animal，他会把Animal也装到该List中。
         List<Class<?>> eventTypes = findEventTypes(eventClass);
         boolean subscriptionFound = false;
         int countTypes = eventTypes.size();
